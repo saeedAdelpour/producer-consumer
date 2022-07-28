@@ -24,18 +24,17 @@ class ProducerConsumer:
             await self.queue.put(item)
 
     async def perform(self, consumer_method_name, args=tuple(), kwargs=dict()):
-        produce_task = asyncio.create_task(self.produce_all())
-
         result = []
+
         try:
             await self.perform_consume(result, consumer_method_name, args, kwargs)
         except asyncio.exceptions.CancelledError:
             pass
-        await produce_task
-        await self.queue.join()
+
         return result
 
     async def perform_consume(self, result, consumer_method_name, args, kwargs):
+        produce_task = asyncio.create_task(self.produce_all())
         self.tasks = [
             asyncio.create_task(
                 self.consume(
@@ -47,6 +46,8 @@ class ProducerConsumer:
 
         task_results = await asyncio.gather(*self.tasks)
         self.check_all_task_results(task_results)
+        await produce_task
+        await self.queue.join()
 
     async def consume(self, result, method, args, kwargs):
         while True:
