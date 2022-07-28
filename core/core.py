@@ -19,18 +19,19 @@ class ProducerConsumer:
         self.consumers = consumers
         self.tasks: List[asyncio.Task] = None
 
-    def produce_all(self):
+    async def produce_all(self):
         for item in self.items:
-            self.queue.put_nowait(item)
+            await self.queue.put(item)
 
     async def perform(self, consumer_method_name, args=tuple(), kwargs=dict()):
-        self.produce_all()
+        produce_task = asyncio.create_task(self.produce_all())
 
         result = []
         try:
             await self.perform_consume(result, consumer_method_name, args, kwargs)
         except asyncio.exceptions.CancelledError:
             pass
+        await produce_task
         await self.queue.join()
         return result
 
