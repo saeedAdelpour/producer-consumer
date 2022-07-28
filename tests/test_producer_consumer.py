@@ -26,10 +26,10 @@ def test_producer_consumer_class_if_one_task_ramin_and_first_consumer_fail(
     create_new_event_loop, Consumer
 ):
     consumers = [Consumer(i) for i in range(2)]
-    items = range(2)
+    items = range(1)
     producer_consumer = ProducerConsumer(items, consumers)
     result = asyncio.run(producer_consumer.perform("run_fail_on_index_0"))
-    assert result == [(1, 1), (1, 0)]
+    assert result == [(1, 0)]
 
 
 def test_producer_consumer_class_check_default_prams_passing(
