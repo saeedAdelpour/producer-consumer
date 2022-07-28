@@ -29,6 +29,18 @@ def test_producer_consumer_class_if_all_fail(create_new_event_loop, Consumer):
     producer_consumer = ProducerConsumer(items, consumers)
     with pytest.raises(AllTasksFailedException):
         asyncio.run(producer_consumer.perform("run_fail"))
+
+
+def test_producer_consumer_class_if_one_task_ramin_and_first_consumer_fail(
+    create_new_event_loop, Consumer
+):
+    consumers = [Consumer(i) for i in range(2)]
+    items = range(2)
+    producer_consumer = ProducerConsumer(items, consumers)
+    result = asyncio.run(producer_consumer.perform("run_fail_on_index_0"))
+    assert result == [(1, 1), (1, 0)]
+
+
 @pytest.fixture
 def Consumer():
     class __Consumer:
@@ -41,4 +53,10 @@ def Consumer():
 
         async def run_fail(self, item):
             raise Exception(str(item))
+
+        async def run_fail_on_index_0(self, item):
+            if self.consumer_index == 0:
+                raise Exception("index fail")
+            return await self.run(item)
+
     return __Consumer
