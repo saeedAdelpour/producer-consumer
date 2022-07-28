@@ -1,6 +1,8 @@
 import asyncio
 import logging
 
+from .exceptions import AllTasksFailedException
+
 
 logger = logging.getLogger(__name__)
 
@@ -68,4 +70,4 @@ class ProducerConsumer:
         """check all tasks are completed or failed, if all tasks failed, raise Exception"""
         failed_tasks = [t for t in task_results if t is TaskResult.fail]
         if len(failed_tasks) == len(task_results):
-            raise Exception("all tasks failed")
+            raise AllTasksFailedException("all tasks failed")
