@@ -1,3 +1,4 @@
+from typing import List
 import asyncio
 import logging
 
@@ -16,6 +17,7 @@ class ProducerConsumer:
         self.queue = asyncio.Queue()
         self.items = items
         self.consumers = consumers
+        self.tasks: List[asyncio.Task] = None
 
     def produce_all(self):
         for item in self.items:
@@ -33,12 +35,16 @@ class ProducerConsumer:
         return result
 
     async def perform_consume(self, result, consumer_method_name, args, kwargs):
-        tasks = [
-            self.consume(result, getattr(consumer, consumer_method_name), args, kwargs)
+        self.tasks = [
+            asyncio.create_task(
+                self.consume(
+                    result, getattr(consumer, consumer_method_name), args, kwargs
+                )
+            )
             for consumer in self.consumers
         ]
 
-        task_results = await asyncio.gather(*tasks)
+        task_results = await asyncio.gather(*self.tasks)
         # write_report(session_objs)
         self.check_all_task_results(task_results)
 
@@ -46,7 +52,7 @@ class ProducerConsumer:
         while True:
             # because we sure that queue will be filled completely, we can check queue.empty()
             if len(result) == len(self.items):
-                self.cancel_tasks("consume")
+                self.cancel_tasks()
 
             item = await self.queue.get()
             try:
@@ -59,12 +65,9 @@ class ProducerConsumer:
                 self.queue.task_done()
                 return TaskResult.fail
 
-    def cancel_tasks(self, task_name):
-        tasks = asyncio.all_tasks()
-        for task in tasks:
-            coro = task.get_coro()
-            if coro.__name__ == task_name:
-                task.cancel()
+    def cancel_tasks(self):
+        for task in self.tasks:
+            task.cancel()
 
     def check_all_task_results(self, task_results):
         """check all tasks are completed or failed, if all tasks failed, raise Exception"""
