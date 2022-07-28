@@ -5,15 +5,6 @@ from core import ProducerConsumer
 from core.exceptions import AllTasksFailedException
 
 
-@pytest.fixture
-def create_new_event_loop():
-    """RuntimeError: There is no current event loop in thread 'MainThread'."""
-    loop = asyncio.new_event_loop()
-    asyncio.set_event_loop(loop)
-    yield
-    loop.close()
-
-
 def test_producer_consumer_class_if_all_success(create_new_event_loop, Consumer):
     consumers = [Consumer(i) for i in range(2)]
     items = range(4)
@@ -60,3 +51,12 @@ def Consumer():
             return await self.run(item)
 
     return __Consumer
+
+
+@pytest.fixture
+def create_new_event_loop():
+    """RuntimeError: There is no current event loop in thread 'MainThread'."""
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+    yield
+    loop.close()
