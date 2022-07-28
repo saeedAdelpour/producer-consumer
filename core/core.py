@@ -14,3 +14,7 @@ class ProducerConsumer:
         self.queue = asyncio.Queue()
         self.items = items
         self.consumers = consumers
+
+    def produce_all(self):
+        for item in self.items:
+            self.queue.put_nowait(item)
