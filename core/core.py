@@ -46,12 +46,10 @@ class ProducerConsumer:
         ]
 
         task_results = await asyncio.gather(*self.tasks)
-        # write_report(session_objs)
         self.check_all_task_results(task_results)
 
     async def consume(self, result, method, args, kwargs):
         while True:
-            # because we sure that queue will be filled completely, we can check queue.empty()
             if len(result) == len(self.items):
                 self.cancel_tasks()
 
