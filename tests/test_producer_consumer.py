@@ -39,4 +39,6 @@ def Consumer():
             await asyncio.sleep(0)
             return (self.consumer_index, item)
 
+        async def run_fail(self, item):
+            raise Exception(str(item))
     return __Consumer
