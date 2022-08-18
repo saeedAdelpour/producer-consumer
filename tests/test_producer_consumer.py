@@ -1,8 +1,8 @@
 import asyncio
 import pytest
 
-from core import ProducerConsumer
-from core.exceptions import AllTasksFailedException
+from producer_consumer import ProducerConsumer
+from producer_consumer.exceptions import AllTasksFailedException
 
 
 def test_producer_consumer_class_if_all_success(create_new_event_loop, Consumer):
