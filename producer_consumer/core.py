@@ -13,11 +13,11 @@ class TaskResult:
 
 
 class ProducerConsumer:
-    def __init__(self, items, consumers) -> None:
+    def __init__(self, items, consumers):
         self.queue = asyncio.Queue()
         self.items = items
         self.consumers = consumers
-        self.tasks: List[asyncio.Task] = None
+        self.tasks = []
 
     async def produce_all(self):
         for item in self.items:
